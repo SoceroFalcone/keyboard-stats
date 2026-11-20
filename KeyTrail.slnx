@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/KeyTrail.Core/KeyTrail.Core.csproj" />
+    <Project Path="src/KeyTrail.Desktop/KeyTrail.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/KeyTrail.Tests/KeyTrail.Tests.csproj" />
+    <Project Path="tests/KeyTrail.Preview/KeyTrail.Preview.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,325 @@
+<Window x:Class="KeyTrail.Desktop.MainWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:ui="clr-namespace:KeyTrail.Desktop.Controls"
+ Title="键盘统计器" Width="1280" Height="900" MinWidth="1060" MinHeight="650"
+ WindowStartupLocation="CenterScreen" Background="#EEF0F3" UseLayoutRounding="True"
+ Icon="Assets/KeyTrail.ico" FontFamily="Segoe UI, Microsoft YaHei UI" FontSize="14" Foreground="{StaticResource Ink}">
+ <Window.Resources>
+  <Style x:Key="OverviewMetric" TargetType="TextBlock" BasedOn="{StaticResource Metric}">
+   <Setter Property="FontSize" Value="28"/><Setter Property="Margin" Value="0,2,0,1"/>
+  </Style>
+  <Style x:Key="OverviewPanel" TargetType="Border" BasedOn="{StaticResource Panel}">
+   <Setter Property="Padding" Value="14,9"/>
+  </Style>
+ </Window.Resources>
+ <Grid>
+ <Grid x:Name="DashboardSurface" Background="#EEF0F3">
+  <Grid.ColumnDefinitions><ColumnDefinition Width="176"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+  <Border Background="#E2E5EA" BorderBrush="#D0D4DB" BorderThickness="0,0,1,0">
+   <Grid Margin="16,28,16,22">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <StackPanel Margin="12,0,0,34">
+     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+      <Border Width="28" Height="28" Background="#3B608F" CornerRadius="7" Margin="0,0,8,0">
+       <Viewbox Margin="6"><Path Stroke="White" StrokeThickness="1.7" StrokeLineJoin="Round" Data="M2,3 L18,3 18,17 2,17 Z M5,7 L7,7 M10,7 L12,7 M15,7 L15,9 M5,12 L14,12"/></Viewbox>
+      </Border>
+      <TextBlock Text="键盘统计器" Foreground="#181B21" FontSize="18" FontWeight="SemiBold"/>
+     </StackPanel>
+     <TextBlock Text="本地使用统计" Foreground="#5A6072" FontSize="13" Margin="36,3,0,0"/>
+    </StackPanel>
+    <StackPanel Grid.Row="1">
+     <RadioButton x:Name="OverviewNav" GroupName="Navigation" Style="{StaticResource NavButton}" IsChecked="True" Checked="Overview_Click">
+      <StackPanel Orientation="Horizontal"><Path Width="17" Height="17" Stretch="Uniform" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.5" Data="M2,2 H8 V8 H2 Z M12,2 H18 V8 H12 Z M2,12 H8 V18 H2 Z M12,12 H18 V18 H12 Z" Margin="0,0,12,0"/><TextBlock Text="每日概览" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel>
+     </RadioButton>
+     <RadioButton x:Name="HistoryNav" GroupName="Navigation" Style="{StaticResource NavButton}" Checked="History_Click">
+      <StackPanel Orientation="Horizontal"><Path Width="17" Height="17" Stretch="Uniform" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.5" Data="M3,4 H17 V18 H3 Z M3,8 H17 M6,1 V6 M14,1 V6 M6,11 H8 M11,11 H14 M6,14 H8" Margin="0,0,12,0"/><TextBlock Text="历史记录" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel>
+     </RadioButton>
+     <RadioButton x:Name="SettingsNav" GroupName="Navigation" Style="{StaticResource NavButton}" Checked="Settings_Click">
+      <StackPanel Orientation="Horizontal"><Path Width="17" Height="17" Stretch="Uniform" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.5" Data="M2,5 H18 M2,10 H18 M2,15 H18 M6,2 V8 M13,7 V13 M8,12 V18" Margin="0,0,12,0"/><TextBlock Text="偏好设置" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel>
+     </RadioButton>
+    </StackPanel>
+    <StackPanel Grid.Row="3">
+     <Border Background="#D8E2EE" CornerRadius="10" Padding="10" Margin="0,0,0,14">
+      <StackPanel><StackPanel Orientation="Horizontal"><Ellipse x:Name="StatusDot" Width="7" Height="7" Fill="#3B608F" Margin="0,0,7,0"/><TextBlock x:Name="StatusText" Text="正在统计" Foreground="#1F3A5C" FontSize="13"/></StackPanel><TextBlock Text="数据仅保存在此电脑" Foreground="#5A6072" FontSize="12" Margin="0,7,0,0"/></StackPanel>
+     </Border>
+     <Button x:Name="PauseButton" Content="暂停统计" Click="Pause_Click" Background="#3B608F" Foreground="White" BorderThickness="0"/>
+     <TextBlock Text="版本 1.7.0 · 本地统计" Foreground="#5A6072" FontSize="12" Margin="8,17,0,0"/>
+    </StackPanel>
+   </Grid>
+  </Border>
+  <Grid Grid.Column="1" Margin="28,18,28,12">
+   <Grid.RowDefinitions>
+    <RowDefinition Height="Auto"/>
+    <RowDefinition Height="Auto"/>
+    <RowDefinition Height="*"/>
+    <RowDefinition Height="Auto"/>
+   </Grid.RowDefinitions>
+   <Grid Margin="0,0,0,12">
+    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <StackPanel VerticalAlignment="Center"><TextBlock x:Name="PageTitle" Text="每日概览" FontSize="25" FontWeight="SemiBold"/><TextBlock x:Name="PageSubtitle" Visibility="Collapsed" Foreground="{StaticResource Muted}" Margin="0,5,0,0"/></StackPanel>
+    <Button x:Name="ExportButton" Grid.Column="2" Content="导出 CSV" Click="Export_Click" Padding="14,8" VerticalAlignment="Center"/>
+    <DockPanel x:Name="DateControls" Grid.Column="1" Margin="24,0,12,0" LastChildFill="False" VerticalAlignment="Center">
+     <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="8">
+      <StackPanel Orientation="Horizontal">
+       <Button x:Name="PreviousDayButton" Click="PreviousDay_Click" Width="38" Padding="0" BorderThickness="0" ToolTip="前一天" AutomationProperties.Name="前一天"><Path Data="M8,1 L2,7 8,13" Stroke="#3B608F" StrokeThickness="1.5"/></Button>
+       <DatePicker x:Name="DayPicker" Width="158" BorderThickness="0" SelectedDateChanged="DayPicker_Changed" DateValidationError="Date_ValidationError" AutomationProperties.Name="统计日期"/>
+       <Button x:Name="NextDayButton" Click="NextDay_Click" Width="38" Padding="0" BorderThickness="0" ToolTip="后一天" AutomationProperties.Name="后一天"><Path Data="M2,1 L8,7 2,13" Stroke="#3B608F" StrokeThickness="1.5"/></Button>
+      </StackPanel>
+     </Border>
+     <Border Background="#E8EAEE" CornerRadius="8" Padding="3" Margin="12,0,0,0">
+      <StackPanel Orientation="Horizontal" KeyboardNavigation.TabNavigation="Once">
+       <RadioButton x:Name="TodayButton" Content="今天" GroupName="DayShortcut" Style="{StaticResource Segment}" Click="Today_Click"/>
+       <RadioButton x:Name="YesterdayButton" Content="昨天" GroupName="DayShortcut" Style="{StaticResource Segment}" Click="Yesterday_Click"/>
+      </StackPanel>
+     </Border>
+     <TextBlock x:Name="DayContext" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="16,0,0,0"/>
+    </DockPanel>
+    <DockPanel x:Name="HistoryControls" Grid.Row="1" Grid.ColumnSpan="3" Visibility="Collapsed" Margin="0,18,0,10" LastChildFill="False">
+     <TextBlock Text="统计对象" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,14,0"/>
+     <Border Background="#E8EAEE" CornerRadius="8" Padding="3">
+      <StackPanel Orientation="Horizontal" KeyboardNavigation.TabNavigation="Once">
+       <RadioButton x:Name="AllDevicesFilter" Content="全部" Tag="All" GroupName="HistoryDevice" Style="{StaticResource Segment}" IsChecked="True" Checked="DeviceFilter_Changed"/>
+       <RadioButton x:Name="KeyboardFilter" Content="键盘" Tag="Keyboard" GroupName="HistoryDevice" Style="{StaticResource Segment}" Checked="DeviceFilter_Changed"/>
+       <RadioButton x:Name="MouseFilter" Content="鼠标" Tag="Mouse" GroupName="HistoryDevice" Style="{StaticResource Segment}" Checked="DeviceFilter_Changed"/>
+      </StackPanel>
+     </Border>
+     <TextBlock Text="同步切换活动热力图与每日记录" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="16,0,0,0"/>
+    </DockPanel>
+   </Grid>
+   <Border x:Name="NoticeBanner" Grid.Row="1" Background="#FFF1D5" CornerRadius="8" Padding="13,6" Margin="0,0,0,9" Visibility="Collapsed">
+    <TextBlock x:Name="NoticeText" Foreground="#805B1F" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+   </Border>
+   <Grid x:Name="OverviewPage" Grid.Row="2">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="2*"/><RowDefinition Height="*" MinHeight="148"/></Grid.RowDefinitions>
+    <UniformGrid Columns="4" Margin="2,0,0,12">
+     <StackPanel><TextBlock Text="键鼠总次数" Style="{StaticResource Caption}"/><TextBlock x:Name="TotalValue" Text="0" Style="{StaticResource OverviewMetric}"/><TextBlock x:Name="CompareLabel" Text="从第一次操作开始积累" Style="{StaticResource Caption}"/></StackPanel>
+     <StackPanel><TextBlock Text="键盘敲击" Style="{StaticResource Caption}"/><TextBlock x:Name="KeyboardTotalValue" Text="0" Style="{StaticResource OverviewMetric}"/><TextBlock x:Name="KeyboardCountHint" Text="含 Ctrl、Shift 等修饰键" Style="{StaticResource Caption}"/></StackPanel>
+     <StackPanel><TextBlock Text="鼠标点击" Style="{StaticResource Caption}"/><TextBlock x:Name="MouseTotalValue" Text="0" Style="{StaticResource OverviewMetric}"/><TextBlock Text="左、右、中键与两侧键" Style="{StaticResource Caption}"/></StackPanel>
+     <StackPanel><TextBlock Text="活跃分钟" Style="{StaticResource Caption}"/><TextBlock x:Name="MinutesValue" Text="0" Style="{StaticResource OverviewMetric}"/><TextBlock Text="有敲击或点击的分钟数" Style="{StaticResource Caption}"/></StackPanel>
+    </UniformGrid>
+    <Border x:Name="MousePanel" Grid.Row="1" Style="{StaticResource OverviewPanel}">
+     <Grid>
+      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+      <DockPanel Margin="0,0,0,6">
+       <Button x:Name="AllKeyboardKeysButton" Content="全部按键" DockPanel.Dock="Right" Click="AllKeys_Click" Margin="12,0,0,0" FontSize="13" Padding="8,3" MinHeight="26" Foreground="#3B608F" ToolTip="查看数字小键盘及其他已记录按键"/>
+       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center"><TextBlock Text="少" Style="{StaticResource Caption}" Margin="0,0,7,0"/><Border Width="14" Height="10" Background="#EEF0F3" CornerRadius="2" Margin="2"/><Border Width="14" Height="10" Background="#D8E2EE" CornerRadius="2" Margin="2"/><Border Width="14" Height="10" Background="#A8C2DD" CornerRadius="2" Margin="2"/><Border Width="14" Height="10" Background="#3B608F" CornerRadius="2" Margin="2"/><Border Width="14" Height="10" Background="#1F3A5C" CornerRadius="2" Margin="2"/><TextBlock Text="多" Style="{StaticResource Caption}" Margin="7,0,0,0"/></StackPanel>
+       <StackPanel Orientation="Horizontal" VerticalAlignment="Center"><TextBlock Text="键鼠热力图" Style="{StaticResource SectionTitle}"/><TextBlock Text="悬停按键查看统计" Style="{StaticResource Caption}" Margin="12,1,0,0" VerticalAlignment="Center"/></StackPanel>
+      </DockPanel>
+      <Grid x:Name="InputModels" Grid.Row="1">
+       <Grid x:Name="InputModelPair" HorizontalAlignment="Center">
+        <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="18"/><ColumnDefinition/></Grid.ColumnDefinitions>
+        <ui:KeyboardHeatmap x:Name="Keyboard" VerticalAlignment="Center"/>
+        <ui:MouseHeatmap x:Name="MouseButtons" Grid.Column="2" Height="{Binding ActualHeight, ElementName=Keyboard}" VerticalAlignment="Center"/>
+       </Grid>
+      </Grid>
+      <Grid Grid.Row="2" Margin="0,6,0,0">
+       <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="14"/><ColumnDefinition/></Grid.ColumnDefinitions>
+       <TextBlock x:Name="KeyDetail" Text="点击键帽查看键盘统计" Foreground="#3B608F" FontSize="13" TextWrapping="Wrap"/>
+       <TextBlock x:Name="MouseDetail" Grid.Column="2" Text="点击鼠标部位查看鼠标统计" Foreground="#3B608F" FontSize="13" TextWrapping="Wrap"/>
+      </Grid>
+      <Border Grid.Row="3" BorderThickness="0,1,0,0" BorderBrush="#E8EAEE" Margin="0,5,0,0" Padding="0,4,0,0">
+       <ContentControl x:Name="MouseSummary" Content="{Binding Summary, ElementName=MouseButtons}" HorizontalContentAlignment="Stretch"/>
+      </Border>
+     </Grid>
+    </Border>
+    <Grid x:Name="OverviewAnalytics" Grid.Row="2" Margin="0,12,0,0">
+     <Grid.ColumnDefinitions><ColumnDefinition Width="1.4*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+     <Border x:Name="HourlyPanel" Style="{StaticResource OverviewPanel}">
+      <Grid>
+       <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+       <DockPanel>
+        <Button Content="查看活动热力图" DockPanel.Dock="Right" Click="Activity_Click" Padding="6,2" MinHeight="24" BorderThickness="0" Foreground="#3B608F" FontSize="13"/>
+        <TextBlock Text="一天的输入节奏" Style="{StaticResource SectionTitle}" VerticalAlignment="Center"/>
+       </DockPanel>
+       <ui:HourlyHeatmap x:Name="HourlyChart" Grid.Row="1" Margin="-2,5,-2,0"/>
+       <TextBlock x:Name="HourlyEmpty" Grid.Row="2" Text="选择或悬停方格，查看该小时次数" Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+      </Grid>
+     </Border>
+     <Border x:Name="RankPanel" Grid.Column="2" Style="{StaticResource OverviewPanel}">
+      <Grid>
+       <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+       <TextBlock Text="常用键盘键" Style="{StaticResource SectionTitle}"/>
+       <UniformGrid x:Name="TopKeysPanel" Grid.Row="1" Columns="1" Margin="0,4,0,0"/>
+       <TextBlock x:Name="RankEmpty" Grid.Row="1" Text="还没有按键记录。打开任意应用，开始输入即可。" TextWrapping="Wrap" Foreground="{StaticResource Muted}" Margin="0,8,0,0"/>
+      </Grid>
+     </Border>
+    </Grid>
+   </Grid>
+   <ScrollViewer x:Name="PageScroll" Grid.Row="2" Visibility="Collapsed" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,4,0">
+    <Grid>
+     <StackPanel x:Name="HistoryPage" Visibility="Collapsed">
+      <Border Style="{StaticResource Panel}" Margin="0,0,0,18">
+       <StackPanel>
+        <DockPanel>
+         <StackPanel DockPanel.Dock="Right" Margin="12,0,0,0">
+          <Border Background="#E8EAEE" CornerRadius="8" Padding="3">
+           <StackPanel Orientation="Horizontal" KeyboardNavigation.TabNavigation="Once" AutomationProperties.Name="热力图时间范围">
+            <RadioButton x:Name="Activity7Days" Content="近 7 天" Tag="7" GroupName="ActivityRange" Style="{StaticResource Segment}" Checked="ActivityRange_Changed"/>
+            <RadioButton x:Name="Activity30Days" Content="近 30 天" Tag="30" GroupName="ActivityRange" Style="{StaticResource Segment}" Checked="ActivityRange_Changed"/>
+            <RadioButton x:Name="Activity180Days" Content="近 180 天" Tag="180" GroupName="ActivityRange" Style="{StaticResource Segment}" Checked="ActivityRange_Changed"/>
+            <RadioButton x:Name="ActivityYear" Content="近一年" Tag="365" GroupName="ActivityRange" Style="{StaticResource Segment}" IsChecked="True" Checked="ActivityRange_Changed"/>
+           </StackPanel>
+          </Border>
+          <TextBlock x:Name="ActivityRangeLabel" Style="{StaticResource Caption}" HorizontalAlignment="Right" Margin="0,5,0,0"/>
+         </StackPanel>
+         <StackPanel VerticalAlignment="Center"><TextBlock Text="活动热力图" Style="{StaticResource SectionTitle}"/><TextBlock Text="每列一周 · 周一至周日" Style="{StaticResource Caption}" Margin="0,5,0,0"/></StackPanel>
+        </DockPanel>
+        <Grid Margin="0,16,0,14">
+         <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+         <StackPanel><TextBlock x:Name="ActivityTotal" FontSize="24" FontWeight="SemiBold"/><TextBlock x:Name="ActivityTotalLabel" Text="区间键鼠次数" Style="{StaticResource Caption}" Margin="0,3,0,0"/></StackPanel>
+         <StackPanel Grid.Column="1"><TextBlock x:Name="ActivityDays" FontSize="23" FontWeight="SemiBold"/><TextBlock Text="有记录的天数" Style="{StaticResource Caption}" Margin="0,3,0,0"/></StackPanel>
+         <StackPanel Grid.Column="2"><TextBlock x:Name="ActivityStreak" FontSize="23" FontWeight="SemiBold"/><TextBlock Text="最长连续天数" Style="{StaticResource Caption}" Margin="0,3,0,0"/></StackPanel>
+        </Grid>
+        <ui:ActivityCalendar x:Name="ActivityChart"/>
+        <DockPanel Margin="0,8,0,0">
+         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+          <TextBlock Text="相对用量" Style="{StaticResource Caption}" Margin="0,0,8,0"/>
+          <TextBlock Text="少" Style="{StaticResource Caption}" Margin="0,0,5,0"/>
+          <ItemsControl x:Name="ActivityLegend" VerticalAlignment="Center" Focusable="False" IsHitTestVisible="False">
+           <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+           <ItemsControl.ItemTemplate><DataTemplate><Border Width="11" Height="11" Background="{Binding}" CornerRadius="2" Margin="2,0"/></DataTemplate></ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Text="多" Style="{StaticResource Caption}" Margin="5,0,0,0"/>
+         </StackPanel>
+         <TextBlock x:Name="ActivityDetail" Style="{StaticResource Caption}" VerticalAlignment="Center"/>
+        </DockPanel>
+        <TextBlock Text="悬停比较前一天 · 点击打开当天统计" Style="{StaticResource Caption}" Margin="0,7,0,0"/>
+       </StackPanel>
+      </Border>
+      <Border x:Name="HistoryRecordsPanel" Style="{StaticResource Panel}"><StackPanel>
+       <DockPanel><TextBlock x:Name="HistoryCount" DockPanel.Dock="Right" Style="{StaticResource Caption}" VerticalAlignment="Center"/><TextBlock Text="每日记录" Style="{StaticResource SectionTitle}"/></DockPanel>
+       <Border Background="#E8EAEE" CornerRadius="8" Padding="3" HorizontalAlignment="Left" Margin="0,16,0,12">
+        <WrapPanel KeyboardNavigation.TabNavigation="Once">
+         <RadioButton x:Name="RangeAll" Content="全部日期" Tag="All" GroupName="HistoryRange" Style="{StaticResource Segment}" IsChecked="True" Checked="HistoryRange_Changed"/>
+         <RadioButton x:Name="RangeToday" Content="今天" Tag="Today" GroupName="HistoryRange" Style="{StaticResource Segment}" Checked="HistoryRange_Changed"/>
+         <RadioButton x:Name="RangeYesterday" Content="昨天" Tag="Yesterday" GroupName="HistoryRange" Style="{StaticResource Segment}" Checked="HistoryRange_Changed"/>
+         <RadioButton x:Name="Range7Days" Content="近 7 天" Tag="Last7Days" GroupName="HistoryRange" Style="{StaticResource Segment}" Checked="HistoryRange_Changed"/>
+         <RadioButton x:Name="Range30Days" Content="近 30 天" Tag="Last30Days" GroupName="HistoryRange" Style="{StaticResource Segment}" Checked="HistoryRange_Changed"/>
+         <RadioButton x:Name="RangeCustom" Content="自定义" Tag="Custom" GroupName="HistoryRange" Style="{StaticResource Segment}" Checked="HistoryRange_Changed"/>
+        </WrapPanel>
+       </Border>
+       <WrapPanel x:Name="CustomDateControls" Visibility="Collapsed" Margin="0,0,0,12" VerticalAlignment="Center">
+        <TextBlock Text="从" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource Caption}"/>
+        <DatePicker x:Name="RangeStartPicker" Width="165" SelectedDateChanged="CustomRange_Changed" DateValidationError="Date_ValidationError" AutomationProperties.Name="开始日期"/>
+        <TextBlock Text="至" VerticalAlignment="Center" Margin="10,0" Style="{StaticResource Caption}"/>
+        <DatePicker x:Name="RangeEndPicker" Width="165" SelectedDateChanged="CustomRange_Changed" DateValidationError="Date_ValidationError" AutomationProperties.Name="结束日期"/>
+       </WrapPanel>
+       <TextBlock x:Name="RangeError" Foreground="#805B1F" Visibility="Collapsed" TextWrapping="Wrap" Margin="0,0,0,12" AutomationProperties.LiveSetting="Polite"/>
+       <TextBlock x:Name="HistoryRangeSummary" Style="{StaticResource Caption}" Margin="0,0,0,14" TextWrapping="Wrap"/>
+       <DataGrid x:Name="HistoryTable" SelectionChanged="HistorySelection_Changed" EnableRowVirtualization="True" EnableColumnVirtualization="True" VirtualizingPanel.VirtualizationMode="Recycling" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" CanUserReorderColumns="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#E8EAEE" BorderThickness="0" Background="White" RowHeight="44" ColumnHeaderHeight="36" SelectionMode="Single" SelectionUnit="FullRow" MouseDoubleClick="History_Open" KeyDown="History_KeyDown" MaxHeight="430" AutomationProperties.Name="每日统计历史">
+        <DataGrid.Resources>
+         <Style TargetType="DataGridColumnHeader"><Setter Property="Background" Value="#E8EAEE"/><Setter Property="Foreground" Value="#5A6072"/><Setter Property="Padding" Value="12,7"/><Setter Property="BorderThickness" Value="0"/></Style>
+         <Style TargetType="DataGridRow"><Setter Property="Foreground" Value="{StaticResource Ink}"/><Setter Property="Background" Value="White"/><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#EEF0F3"/></Trigger><Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#D8E2EE"/></Trigger></Style.Triggers></Style>
+         <Style TargetType="DataGridCell"><Setter Property="Foreground" Value="{StaticResource Ink}"/><Setter Property="Background" Value="Transparent"/><Setter Property="Padding" Value="12,7"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="DataGridCell"><Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"><ContentPresenter VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter></Style>
+        </DataGrid.Resources>
+        <DataGrid.Columns><DataGridTextColumn Header="日期" Binding="{Binding DateLabel}" Width="1.6*" SortMemberPath="Date"/><DataGridTextColumn x:Name="HistoryTotalColumn" Header="键鼠合计" Binding="{Binding SelectedTotal, StringFormat=N0}" Width="*"/><DataGridTextColumn x:Name="HistoryKeyboardColumn" Header="键盘" Binding="{Binding KeyboardTotal, StringFormat=N0}" Width="*"/><DataGridTextColumn x:Name="HistoryMouseColumn" Header="鼠标" Binding="{Binding MouseTotal, StringFormat=N0}" Width="*"/><DataGridTextColumn Header="键鼠活跃分钟" Binding="{Binding Minutes}" Width="1.25*"/><DataGridTextColumn x:Name="HistoryFavoriteColumn" Header="常用键盘键" Binding="{Binding Favorite}" Width="1.1*"/></DataGrid.Columns>
+       </DataGrid><TextBlock x:Name="HistoryEmpty" Text="还没有历史记录。统计会在每天自动归档。" Style="{StaticResource Caption}" Margin="0,24,0,24" TextWrapping="Wrap"/>
+       <DockPanel x:Name="HistoryActions" Margin="0,14,0,0"><Button x:Name="OpenHistoryButton" Content="查看当天" DockPanel.Dock="Right" Click="History_Open" Margin="12,0,0,0"/><TextBlock Text="双击记录或按 Enter 查看当天；活跃分钟为键鼠合计。" Style="{StaticResource Caption}" VerticalAlignment="Center" TextWrapping="Wrap"/></DockPanel>
+      </StackPanel></Border>
+     </StackPanel>
+     <StackPanel x:Name="SettingsPage" Visibility="Collapsed" MaxWidth="850" HorizontalAlignment="Left">
+      <Border Style="{StaticResource Panel}" Margin="0,0,0,18"><StackPanel><TextBlock Text="记录方式" Style="{StaticResource SectionTitle}"/>
+       <CheckBox x:Name="RepeatsCheck" Content="将键盘长按产生的连续输入计入统计" Click="Settings_Changed" Margin="0,20,0,8"/><TextBlock Text="关闭时，每次实际按下只记一次；Ctrl、Shift 等修饰键分别计数。" Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="23,0,0,18"/>
+       <CheckBox x:Name="TrayCheck" Content="关闭窗口后留在系统托盘" Click="Settings_Changed"/><TextBlock Text="可从任务栏通知区域重新打开，或右键托盘图标选择「退出」。" Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="23,0,0,18"/>
+       <CheckBox x:Name="StartupCheck" Content="登录 Windows 后自动开始运行" Click="Startup_Changed"/><TextBlock Text="启用后从托盘启动。若上次为暂停状态，重启后仍保持暂停。" Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="23,0,0,3"/>
+      </StackPanel></Border>
+      <Border Style="{StaticResource Panel}" Margin="0,0,0,18"><StackPanel><TextBlock Text="你的数据，留在你的电脑" Style="{StaticResource SectionTitle}"/><TextBlock Text="仅保存键盘按键和鼠标按钮的次数、每小时总量和活跃分钟。不记录输入文字、按键顺序、鼠标位置、窗口或应用信息，也不会联网发送数据。" TextWrapping="Wrap" Foreground="#5A6072" LineHeight="24" Margin="0,14,0,17"/><TextBlock Text="数据目录" Style="{StaticResource Caption}"/><TextBox x:Name="DataPathBox" IsReadOnly="True" BorderThickness="0" Background="#EEF0F3" Padding="10" Margin="0,7,0,12" TextWrapping="Wrap" AutomationProperties.Name="本地统计数据目录"/><StackPanel Orientation="Horizontal"><Button Content="打开数据目录" Click="OpenFolder_Click"/><Button Content="导出全部记录" Click="ExportAll_Click" Margin="10,0,0,0"/></StackPanel></StackPanel></Border>
+      <Border Style="{StaticResource Panel}"><StackPanel><TextBlock Text="关于统计" Style="{StaticResource SectionTitle}"/><TextBlock Text="按本机日期在午夜自动分日，每 5 秒保存一次，正常退出时立即保存。活跃分钟表示该分钟内至少发生过一次键盘敲击或鼠标点击，同一分钟只算一次，并非连续工作时长。" TextWrapping="Wrap" Foreground="#5A6072" LineHeight="24" Margin="0,14,0,12"/><TextBlock Text="键盘热力图采用照片中的无数字区布局。数字小键盘及其他额外按键仍会统计，可在「全部按键」中查看。Fn 等不向 Windows 发送独立键码的硬件键无法计数；锁屏和安全桌面不统计。鼠标统计左键、右键、中键（滚轮按下）和两个侧键；移动、拖拽过程与滚轮滚动不额外计数。软件模拟的输入默认忽略。" TextWrapping="Wrap" Foreground="#5A6072" LineHeight="24"/><TextBlock Text="键盘统计器 1.7.0 · Windows 桌面版" Style="{StaticResource Caption}" Margin="0,20,0,0"/></StackPanel></Border>
+     </StackPanel>
+    </Grid>
+   </ScrollViewer>
+   <DockPanel Grid.Row="3" Margin="0,10,0,0"><TextBlock x:Name="SaveLabel" DockPanel.Dock="Right" Text="每 5 秒自动保存" Style="{StaticResource Caption}" FontSize="13"/><TextBlock x:Name="FooterLabel" Text="统计会自动跟随本机日期归档" Style="{StaticResource Caption}" FontSize="13"/></DockPanel>
+  </Grid>
+ </Grid>
+  <Canvas x:Name="KeyHoverLayer" IsHitTestVisible="False" ClipToBounds="True">
+   <Border x:Name="KeyHoverCard" Width="246" Visibility="Collapsed" TextElement.Foreground="#152B46">
+    <Grid>
+     <Border Background="#A6CCDAEB" CornerRadius="16">
+      <Border.Effect><DropShadowEffect Color="#1F3A5C" BlurRadius="24" ShadowDepth="4" Opacity="0.31"/></Border.Effect>
+     </Border>
+     <Grid x:Name="KeyHoverGlass">
+      <Grid.Clip><RectangleGeometry x:Name="KeyHoverGlassOutline" RadiusX="16" RadiusY="16"/></Grid.Clip>
+      <Border x:Name="KeyHoverBackdrop" Margin="-12">
+       <Border.Background><VisualBrush x:Name="KeyHoverBackdropBrush" AutoLayoutContent="False" ViewboxUnits="Absolute" Stretch="Fill"/></Border.Background>
+       <Border.Effect><BlurEffect Radius="12" RenderingBias="Performance"/></Border.Effect>
+      </Border>
+      <Border>
+       <Border.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="0.85,1">
+         <GradientStop Color="#CAF7FBFF" Offset="0"/>
+         <GradientStop Color="#B6EDF5FF" Offset="0.48"/>
+         <GradientStop Color="#B8DDEBFE" Offset="1"/>
+        </LinearGradientBrush>
+       </Border.Background>
+      </Border>
+     </Grid>
+     <Border CornerRadius="16" BorderThickness="1" Padding="15,11,15,10">
+      <Border.BorderBrush>
+       <LinearGradientBrush StartPoint="0.15,0" EndPoint="0.85,1">
+        <GradientStop Color="#FFFFFFFF" Offset="0"/>
+        <GradientStop Color="#BFFFFFFF" Offset="0.48"/>
+        <GradientStop Color="#90B8CDE7" Offset="1"/>
+       </LinearGradientBrush>
+      </Border.BorderBrush>
+      <StackPanel>
+       <Grid>
+        <StackPanel x:Name="KeyHoverStats">
+         <TextBlock x:Name="KeyHoverCountLabel" Text="按下次数" Foreground="#233B59" FontSize="13"/>
+         <Viewbox Height="37" StretchDirection="DownOnly" HorizontalAlignment="Left" Margin="0,1,0,8">
+          <StackPanel Orientation="Horizontal">
+           <TextBlock x:Name="KeyHoverCount" FontFamily="Segoe UI" FontSize="30" FontWeight="SemiBold" VerticalAlignment="Bottom"/>
+           <TextBlock Text="次" Foreground="#233B59" FontSize="13" Margin="6,0,0,6" VerticalAlignment="Bottom"/>
+          </StackPanel>
+         </Viewbox>
+         <DockPanel>
+          <TextBlock x:Name="KeyHoverShare" DockPanel.Dock="Right" MaxWidth="145" TextWrapping="Wrap" TextAlignment="Right" FontSize="13" FontWeight="SemiBold"/>
+          <TextBlock x:Name="KeyHoverShareLabel" Text="占当日键盘敲击" Foreground="#233B59" FontSize="13"/>
+         </DockPanel>
+        </StackPanel>
+        <TextBlock x:Name="KeyHoverUnavailable" Text="Fn 由键盘硬件处理，无法单独统计。" Foreground="#233B59" FontSize="13" TextWrapping="Wrap" Visibility="Collapsed"/>
+       </Grid>
+       <Border BorderBrush="#385A7799" BorderThickness="0,1,0,0" Margin="0,9,0,0" Padding="0,7,0,0">
+        <DockPanel>
+         <TextBlock x:Name="KeyHoverDate" DockPanel.Dock="Right" Foreground="#233B59" FontSize="12" VerticalAlignment="Center"/>
+         <TextBlock x:Name="KeyHoverName" FontSize="14" FontWeight="SemiBold" Margin="0,0,6,0" TextTrimming="CharacterEllipsis"/>
+        </DockPanel>
+       </Border>
+      </StackPanel>
+     </Border>
+    </Grid>
+   </Border>
+  </Canvas>
+  <Grid x:Name="AllKeysOverlay" Visibility="Collapsed" Background="#60253344">
+   <Border x:Name="AllKeysPanel" Style="{StaticResource Panel}" Width="756" HorizontalAlignment="Center" VerticalAlignment="Center"
+           KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle"
+           PreviewKeyDown="AllKeys_KeyDown" AutomationProperties.Name="全部按键">
+    <Grid>
+     <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="224"/><RowDefinition Height="Auto"/>
+     </Grid.RowDefinitions>
+     <DockPanel>
+      <Button x:Name="CloseAllKeysButton" Content="关闭" DockPanel.Dock="Right" Click="AllKeys_Close" Padding="12,5" MinHeight="30"/>
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+       <TextBlock Text="全部按键" Style="{StaticResource SectionTitle}"/>
+       <TextBlock x:Name="AllKeysDate" Style="{StaticResource Caption}" Margin="12,0,0,0" VerticalAlignment="Center"/>
+      </StackPanel>
+     </DockPanel>
+     <DockPanel Grid.Row="1" Margin="4,12,4,9">
+      <TextBlock DockPanel.Dock="Left" Text="搜索按键" Style="{StaticResource Caption}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+      <TextBox x:Name="KeySearch" Padding="9,7" TextChanged="KeySearch_Changed" ToolTip="按名称或分类筛选" AutomationProperties.Name="搜索按键名称或分类"/>
+     </DockPanel>
+     <WrapPanel x:Name="AllKeysList" Grid.Row="2" Width="700" ItemWidth="140" ItemHeight="56" HorizontalAlignment="Center"/>
+     <TextBlock x:Name="NoKeyResults" Grid.Row="2" Text="没有符合条件的按键记录" Style="{StaticResource Caption}"
+                HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+     <DockPanel Grid.Row="3" Margin="4,10,4,0">
+      <Button x:Name="PreviousKeysPageButton" Content="上一页" DockPanel.Dock="Left" Click="PreviousKeysPage_Click" Padding="12,5" MinHeight="30"/>
+      <Button x:Name="NextKeysPageButton" Content="下一页" DockPanel.Dock="Right" Click="NextKeysPage_Click" Padding="12,5" MinHeight="30"/>
+      <TextBlock x:Name="KeyPageLabel" Style="{StaticResource Caption}" HorizontalAlignment="Center" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/>
+     </DockPanel>
+    </Grid>
+   </Border>
+  </Grid>
+ </Grid>
+</Window>

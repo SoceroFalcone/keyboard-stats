@@ -1,0 +1,11 @@
+# 1.4 realistic mouse-region redesign review
+
+**Superseded by user evidence:** the user subsequently identified the physical right-flank placement of the two side buttons. The original review missed this handedness error. V1.4.1 replaces the model against the user's official Viper V4 Pro reference and requires a fresh independent full review; the historical verdict below does not approve the corrected version.
+
+Independent fresh review after the user rejected V1.3, 2026-11-15. **Disposition: ship** for the replaced mouse region at 1280 × 900 and 1060 × 700 and the supplied states. No material visual/interaction findings; no required fixes. The verdict does not substitute for the user's aesthetic acceptance or approve unrelated application surfaces.
+
+The reviewer inspected the rejected V1.3 screenshot as an anti-reference and all eight V1.4 captures under `.impeccable/review/v1.4`. It confirmed realistic compound surfaces, molded edges, matte chassis, recessed seams and ribbed wheel; five aligned surface masks retaining lighting/texture; distinguishable heat tones with unshaded swatches and exact counts; stable hover/press opacity; selected-row/detail clarity and two-tone native focus. Narrow, empty, wheel-only and million-count states remain readable without overlap.
+
+The review also inspected MouseArtwork, MouseHeatmap, the scoped template, panel, preview assertions, provenance and memory artifacts. It supports bounded and releasable artwork overhead, not lower total visible-window memory: the controlled visible sample rose from roughly 116.1 to 128.2 MiB private memory, and 145.4 to 158.5 MiB working set. Retained artwork pixels total 4.91 MiB. Methodology and measured background samples are in PERFORMANCE.md.
+
+All eight current captures are actual demo-labeled WPF output at 125% DPI. Mouse-focused images intentionally scroll to the component; simultaneous hover/press states are in-process palette fixtures, not an OS input audit. No web detector applies to native WPF. The local contract is recorded in docs/surface.md V1.4, preserving the incumbent typography/palette outside the mouse region. The exact original image-generation prompt is embedded in the one shipped raster, with sidecar provenance; no CLI image-generation fallback was used.

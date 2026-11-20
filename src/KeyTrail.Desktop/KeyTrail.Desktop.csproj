@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>KeyTrail</AssemblyName>
+    <RootNamespace>KeyTrail.Desktop</RootNamespace>
+    <AssemblyTitle>键盘统计器</AssemblyTitle>
+    <Product>键盘统计器</Product>
+    <Description>每日键盘与鼠标使用统计</Description>
+    <Version>1.7.0</Version>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\KeyTrail.ico</ApplicationIcon>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\KeyTrail.Core\KeyTrail.Core.csproj" />
+    <Resource Include="Assets\KeyTrail.ico" />
+    <Resource Include="Assets\Mouse\mouse-viper-neutral.png" />
+    <Resource Include="Assets\Keyboard\keyboard-neutral.png" />
+  </ItemGroup>
+</Project>

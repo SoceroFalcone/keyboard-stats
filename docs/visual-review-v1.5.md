@@ -1,0 +1,9 @@
+# 1.5 photo keyboard and upright mouse review
+
+2026-11-15. Fresh independent finish review: **disposition: ship**, with no material fixes, for the paired input-visualization surface and the supplied states at 1280 × 900 and 1060 × 700. Full five-section record: `.impeccable/review/v1.5/review.md`.
+
+The reviewer opened the user's keyboard photograph, the previous correctly handed mouse capture, and all fourteen required current WPF captures. The photo's cap grouping, extra mute key, navigation block, arrows, Fn and absent numeric keypad are retained. Sculpted keycap tops, muted-lilac skirts and the existing mouse material remain visible beneath the data colors. Native readable labels replace the photo's illuminated legends. The mouse is upright beside the keyboard, with thumb keys on the physical left and the previous X2-forward/X1-rear mapping intact. Five exact mouse counts form one strip below both devices. Empty, one-click, wheel-only, million-count, focus, hover and pressed states remain understandable at the reviewed sizes.
+
+The source and test evidence support all 87 native key targets, a non-counted hardware Fn, correct image landmarks, preserved Num7 data accessible in All keys, current-level texture reuse, and release of both controls plus all 95 image sources. Visible retained pixel allocation is 6.31 MiB; this is not a whole-process memory claim. Single-run identical-data background samples remain close to V1.4.1. Both raster prompts and provenance are present; the seed's existing provenance was corroborated by the read-only checker. No native-inapplicable web detector ran.
+
+This remains an ordinary scoped extension. DESIGN.md and `.impeccable/design.json` were preserved; the reviewer sampled exact incumbent ground #F3F6F1, rail #173D31 and white panel. The changed composition, reference image, material choices and resource constraints are recorded in docs/surface.md V1.5, README, MOUSE.md, TESTING.md and PERFORMANCE.md.

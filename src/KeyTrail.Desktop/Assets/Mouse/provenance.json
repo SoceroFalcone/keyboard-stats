@@ -1,0 +1,21 @@
+{
+  "version": "1.4.1",
+  "asset": "mouse-viper-neutral.png",
+  "created": "2026-11-15",
+  "tool": "built-in image_gen",
+  "kind": "Generated unbranded visualization based on user-specified official product references; not a photograph or device detector",
+  "references": [
+    "https://www.razer.com/tw-zh/gaming-mice/razer-viper-v4-pro",
+    "https://assets2.razerzone.com/images/pnx.assets/eb5fbd749917af6235780a1bdba7bdac/razer-viper-v4-pro-pointers-760.webp",
+    "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/h9d/h5d/10039373168670/viper-v4-pro-black-2-500x500.png"
+  ],
+  "orientation": "Nose upper-left; heel lower-right; physical LEFT flank exposed with X2 forward and X1 rear; physical LEFT main on same flank. No swaps of stored IDs.",
+  "image": {
+    "width": 1536,
+    "height": 1024,
+    "transparent": true,
+    "decodeWidth": 640
+  },
+  "prompt": "Use case: product-mockup. Create a single reusable transparent 3D product plate for a native desktop mouse heatmap, based closely on the provided OFFICIAL Razer Viper V4 Pro references. Reference 1 contains an upright top/left view on the left and an underside view on the right: use the upright LEFT object only, never the underside. Reference 2 is the exact top silhouette. Match the Viper V4 Pro's elongated symmetrical shell, restrained pinched waist, broad squared-off separate main click plates with slight finger concavity, thin central wheel channel, rounded palm heel, low smooth hump, and TWO slim separate longitudinal thumb buttons on its PHYSICAL LEFT flank. No thumb wing or oversized ergonomic bulge.\nCRITICAL HANDEDNESS AND CAMERA: the mouse is for a RIGHT-HANDED user. Camera is ABOVE and BEHIND the user's LEFT shoulder, looking down at the TOP and PHYSICAL LEFT SIDE. Nose/front points toward the UPPER LEFT of the canvas; rounded palm heel points toward the LOWER RIGHT. The two thumb buttons must appear along the LOWER-LEFT / IMAGE-LEFT visible edge. They are NOT on the image-right edge. The physical LEFT main click plate is on the same side of the wheel as these thumb buttons (the lower-left side of the image); physical RIGHT click plate is on the upper-right side of the wheel. Do not mirror this arrangement. Preserve the official reference's left-flank button locations and narrow proportions. Both main click plates, the wheel tread, and both thumb button faces must be separately visible.\nMaterials: premium graphite black matte chassis, fine microtexture, subtle broad studio highlights, recessed dark seams, real molded edge thickness, ribbed rubber scroll wheel. For heatmap tinting, make ONLY the five clickable faces neutral medium-light gray while retaining realistic bevels, light/shadow and texture. Small status indicator in the central strip is unlit and is NOT an extra button. All remaining housing stays graphite. No logo, brand lettering, RGB, captions, callouts, cable or extra objects. Real photographic industrial design quality, not an outline diagram or low-poly object.\nComposition: landscape 3:2, entire mouse visible with generous transparent margin on every edge, camera elevation about 50 degrees, mild long-lens perspective. Native transparent RGBA background, no floor or backdrop. Keep the top and left flank well lit enough to trace all five button boundaries accurately.",
+  "runtimeAdaptation": "V1.5.0: same raster, frozen upright rotation applied together with all hit surfaces; physical left preserved. No rotated bitmap copy."
+}
