@@ -13,7 +13,7 @@
 
 默认编译器路径为 `artifacts/installer-tools/InnoSetup7/ISCC.exe`，本次使用 Inno Setup 7.1.1。工具来自 [官方发布页](https://jrsoftware.org/inno-setup/downloads)，下载文件已验证 Authenticode 签名及 Pyrsys B.V. 发布者，使用其便携模式解包到工作目录。
 
-构建会重新编译不含调试符号的 self-contained win-x64 单文件应用，使用独立临时目录生成分发清单，然后编译安装包。执行程序对外命名为「键盘统计器.exe」，程序集名和数据目录仍沿用 KeyTrail，以兼容现有数据。
+构建会重新编译不含调试符号的 self-contained win-x64 应用，使用独立目录生成分发清单，然后编译为一个安装包。安装时将 WPF 原生运行库放在「键盘统计器.exe」旁边，打开界面时可直接从安装目录加载这些文件。程序集名和数据目录仍沿用 KeyTrail，以兼容现有数据。
 
 发布目录 `release/<版本>/` 包含：
 

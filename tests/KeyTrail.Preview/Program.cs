@@ -20,6 +20,7 @@ internal static class Program
         if (args.Contains("--benchmark")) return PerformanceProbe.Run(args.FirstOrDefault(a => !a.StartsWith("--")) ?? "artifacts/performance");
         var root = Path.GetFullPath(args.FirstOrDefault() ?? "artifacts/preview");
         Directory.CreateDirectory(root);
+        VerifySettingsRecovery(Path.Combine(root, "settings-recovery-" + Guid.NewGuid().ToString("N")));
         var data = Path.Combine(root, "fixture-" + Guid.NewGuid().ToString("N"));
         Console.WriteLine("Starting isolated WPF rendering test");
         var app = new App(renderOnly: true);
@@ -206,6 +207,23 @@ internal static class Program
         reopened.AllowClose = true; reopened.Close();
         Console.WriteLine("PASS WPF overview, hourly heat cells, rolling activity totals, date hit-testing, keyboard activation, leap day, key inspection, asynchronous history, settings persistence, pause/resume, date selection, empty state, small-window render, hidden/minimized timer suspension, UI unloading, background collection and autosave, state restoration");
         return 0;
+    }
+
+    private static void VerifySettingsRecovery(string directory)
+    {
+        new AppSettings { Paused = true, CountRepeats = true, CloseToTray = false }.Save(directory);
+        var primary = Path.Combine(directory, "settings.json");
+        File.Move(primary, primary + ".removed");
+        var restored = AppSettings.Load(directory, out var notice);
+        if (!restored.Paused || !restored.CountRepeats || restored.CloseToTray || notice is null || !File.Exists(primary))
+            throw new Exception("Missing preferences did not recover from the first saved backup");
+
+        File.WriteAllText(primary, "{damaged preferences");
+        restored = AppSettings.Load(directory, out notice);
+        var preserved = Directory.GetFiles(directory, "settings.json.corrupt-*").Single();
+        if (!restored.Paused || notice is null || File.ReadAllText(preserved) != "{damaged preferences")
+            throw new Exception("Corrupted preferences did not recover without losing the original");
+        Console.WriteLine("PASS missing and damaged preferences recover from backup");
     }
 
     private static void VerifyHistoryFilters(MainWindow window, StatsController controller, string root)

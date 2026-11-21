@@ -1,8 +1,10 @@
-param([string]$DataRoot = (Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'KeyTrail'), [string]$ExpectedVersion = '1.6.1', [string]$ReportDirectory = 'artifacts/rename-1.6.1')
+param([string]$DataRoot = (Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'KeyTrail'), [string]$ExpectedVersion = '1.6.1', [string]$ReportDirectory = 'artifacts/rename-1.6.1', [string]$StageDirectory = 'dist/KeyTrail-update')
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $target = Join-Path $projectRoot 'dist\KeyTrail\KeyTrail.exe'
-$stage = Join-Path $projectRoot 'dist\KeyTrail-update\KeyTrail.exe'
+$stageRoot = [IO.Path]::GetFullPath((Join-Path $projectRoot $StageDirectory))
+if (-not $stageRoot.StartsWith($projectRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw 'Staged files must be inside the project.' }
+$stage = Join-Path $stageRoot 'KeyTrail.exe'
 $pending = $target + '.pending'
 $previous = $target + '.previous'
 $data = [IO.Path]::GetFullPath($DataRoot)
@@ -15,7 +17,9 @@ $visible = $false
 if ($running.Count -eq 1) {
     $visible = $running[0].MainWindowHandle -ne [IntPtr]::Zero
     if ([version]([Diagnostics.FileVersionInfo]::GetVersionInfo($target).FileVersion) -ge [version]'1.1.0.0') {
-        $exitRequest = Start-Process -FilePath $target -ArgumentList @('--exit', '--data-dir', ('"' + $data + '"')) -WindowStyle Hidden -PassThru
+        # The staged executable can signal the old instance without asking
+        # the old bundle to extract its missing runtime files again.
+        $exitRequest = Start-Process -FilePath $stage -ArgumentList @('--exit', '--data-dir', ('"' + $data + '"')) -WindowStyle Hidden -PassThru
         if (-not $exitRequest.WaitForExit(10000) -or $exitRequest.ExitCode -ne 0 -or -not $running[0].WaitForExit(10000)) { throw 'The app has not saved and exited; the current executable was not replaced.' }
     } else {
         & (Join-Path $PSScriptRoot 'stop-keytrail-gracefully.ps1') -ProcessId $running[0].Id -ExpectedExecutable $target
@@ -42,6 +46,12 @@ if (Test-Path -LiteralPath $data) {
 }
 
 # An atomic replacement keeps the old executable available for rollback.
+$nativeLibraries = @(Get-ChildItem -LiteralPath $stageRoot -File -Filter '*.dll')
+foreach ($library in $nativeLibraries) {
+    $installedLibrary = Join-Path (Split-Path -Parent $target) $library.Name
+    Copy-Item -LiteralPath $library.FullName -Destination $installedLibrary -Force
+    if ((Get-FileHash -LiteralPath $installedLibrary).Hash -ne (Get-FileHash -LiteralPath $library.FullName).Hash) { throw ('Runtime copy verification failed: ' + $library.Name) }
+}
 Copy-Item -LiteralPath $stage -Destination $pending -Force
 if (Test-Path -LiteralPath $target) { [IO.File]::Replace($pending, $target, $previous, $true) }
 else { [IO.File]::Move($pending, $target) }
@@ -58,6 +68,7 @@ $result = [PSCustomObject]@{
     Background = -not $visible
     BackupPath = $backup
     VerifiedBackupFiles = $savedFiles.Count
+    VerifiedRuntimeLibraries = $nativeLibraries.Count
     ExecutableMatchesTestedPackage = ((Get-FileHash -LiteralPath $target).Hash -eq (Get-FileHash -LiteralPath $stage).Hash)
     DataRoot = $data
 }

@@ -60,6 +60,7 @@ Name: "startmenuicon"; Description: "添加到开始菜单"; GroupDescription: "
 [Files]
 ; Explicit allowlist: no user statistics, settings, development files or backups.
 Source: "{#PayloadDir}\{#AppExe}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#PayloadDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#PayloadDir}\使用说明.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#PayloadDir}\第三方许可\dotnet-LICENSE.txt"; DestDir: "{app}\第三方许可"; Flags: ignoreversion
 Source: "{#PayloadDir}\第三方许可\dotnet-THIRD-PARTY-NOTICES.txt"; DestDir: "{app}\第三方许可"; Flags: ignoreversion

@@ -30,8 +30,14 @@ public sealed class StatsStore
         _cacheLimit = cacheLimit;
         DirectoryPath = Path.GetFullPath(directory);
         Directory.CreateDirectory(DirectoryPath);
-        foreach (var path in Directory.EnumerateFiles(DirectoryPath, "*.json"))
-            if (DateOnly.TryParseExact(Path.GetFileNameWithoutExtension(path), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)) _knownDates.Add(date);
+        foreach (var path in Directory.EnumerateFiles(DirectoryPath, "*.json*"))
+        {
+            var name = Path.GetFileName(path);
+            if (name.EndsWith(".bak", StringComparison.OrdinalIgnoreCase)) name = name[..^4];
+            if (name.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
+                && DateOnly.TryParseExact(name.AsSpan(0, name.Length - 5), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+                _knownDates.Add(date);
+        }
     }
 
     public DayStats GetDay(DateOnly date) { lock (_gate) return Load(date).Copy(); }
@@ -77,10 +83,13 @@ public sealed class StatsStore
             try
             {
                 var recovered = ReadValid(path + ".bak", date);
-                if (File.Exists(path)) File.Copy(path, path + ".corrupt-" + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff"), false);
+                var hadPrimary = File.Exists(path);
+                if (hadPrimary) File.Copy(path, path + ".corrupt-" + Guid.NewGuid().ToString("N"), false);
                 // Restore the last verified backup without replacing it with the damaged primary.
                 AtomicWrite(path, JsonSerializer.Serialize(recovered, JsonOptions), false);
-                RecoveryNotice = $"{date:yyyy-MM-dd} 的统计文件异常，已恢复上一次备份；原文件已保留。";
+                RecoveryNotice = hadPrimary
+                    ? $"{date:yyyy-MM-dd} 的统计已从备份恢复，损坏的原文件已保留。"
+                    : $"{date:yyyy-MM-dd} 的统计文件缺失，已从备份恢复。";
                 return Remember(date, recovered);
             }
             catch (Exception backupEx) when (backupEx is IOException or JsonException or InvalidDataException or OverflowException)
@@ -169,6 +178,9 @@ public sealed class StatsStore
     public static void AtomicWrite(string path, string contents, bool backup)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
+        // The first successful save must have a backup even if no second save is needed.
+        if (backup && !File.Exists(path) && !File.Exists(path + ".bak"))
+            AtomicWrite(path + ".bak", contents, false);
         var temp = path + ".tmp";
         using (var stream = new FileStream(temp, FileMode.Create, FileAccess.Write, FileShare.None))
         {

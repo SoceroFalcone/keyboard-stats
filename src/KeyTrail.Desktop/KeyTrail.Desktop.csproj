@@ -11,7 +11,9 @@
     <AssemblyTitle>键盘统计器</AssemblyTitle>
     <Product>键盘统计器</Product>
     <Description>每日键盘与鼠标使用统计</Description>
-    <Version>1.7.0</Version>
+    <Version>1.7.2</Version>
+    <!-- WPF can load native libraries after hours in the tray. Keep them beside the app. -->
+    <IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\KeyTrail.ico</ApplicationIcon>
     <DebugType>embedded</DebugType>

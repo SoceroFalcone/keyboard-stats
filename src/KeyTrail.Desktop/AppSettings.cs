@@ -9,13 +9,39 @@ public sealed class AppSettings
     public bool CountRepeats { get; set; }
     public bool Paused { get; set; }
     public bool CloseToTray { get; set; } = true;
-    public static AppSettings Load(string directory)
+    public static AppSettings Load(string directory) => Load(directory, out _);
+
+    public static AppSettings Load(string directory, out string? recoveryNotice)
     {
+        recoveryNotice = null;
         var path = Path.Combine(directory, "settings.json");
-        if (!File.Exists(path)) return new();
-        return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(path)) ?? throw new InvalidDataException("设置文件为空。");
+        var backupPath = path + ".bak";
+        if (!File.Exists(path) && !File.Exists(backupPath)) return new();
+
+        try { return Read(path); }
+        catch (Exception error) when (error is IOException or JsonException or InvalidDataException)
+        {
+            AppSettings recovered;
+            try { recovered = Read(backupPath); }
+            catch (Exception backupError) when (backupError is IOException or JsonException or InvalidDataException)
+            {
+                throw new InvalidDataException("无法读取偏好设置及其备份。文件已保留，请从可用的备份恢复。", new AggregateException(error, backupError));
+            }
+
+            var hadPrimary = File.Exists(path);
+            if (hadPrimary) File.Copy(path, path + ".corrupt-" + Guid.NewGuid().ToString("N"));
+            StatsStore.AtomicWrite(path, JsonSerializer.Serialize(recovered, JsonOptions), false);
+            recoveryNotice = hadPrimary
+                ? "偏好设置已从备份恢复，损坏的原文件已保留。"
+                : "偏好设置文件缺失，已从备份恢复。";
+            return recovered;
+        }
     }
-    public void Save(string directory) => StatsStore.AtomicWrite(Path.Combine(directory, "settings.json"), JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }), true);
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static AppSettings Read(string path) => JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(path)) ?? throw new InvalidDataException("设置文件为空。");
+
+    public void Save(string directory) => StatsStore.AtomicWrite(Path.Combine(directory, "settings.json"), JsonSerializer.Serialize(this, JsonOptions), true);
 }
 
 public static class StartupRegistration

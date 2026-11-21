@@ -1,4 +1,4 @@
-param([string]$CompilerPath = '', [string]$ReportDirectory = 'artifacts/distribution')
+param([string]$CompilerPath = '', [string]$ReportDirectory = 'artifacts/distribution', [switch]$SkipRestore)
 $ErrorActionPreference = 'Stop'
 $taskRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $taskProject = Join-Path $taskRoot 'src\KeyTrail.Desktop\KeyTrail.Desktop.csproj'
@@ -23,15 +23,23 @@ $env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 $env:DOTNET_ADD_GLOBAL_TOOLS_TO_PATH = 'false'
 $env:DOTNET_GENERATE_ASPNET_CERTIFICATE = 'false'
 $env:MSBuildEnableWorkloadResolver = 'false'
-& dotnet restore $taskProject -r win-x64 --nologo
-if ($LASTEXITCODE -ne 0) { throw 'Release dependency restore failed.' }
+if (-not $SkipRestore) {
+    & dotnet restore $taskProject -r win-x64 --nologo
+    if ($LASTEXITCODE -ne 0) { throw 'Release dependency restore failed.' }
+}
 # Force a clean compilation: incremental publish can otherwise retain embedded
 # developer symbols from an earlier local build with the same configuration.
-& dotnet build $taskProject -c Release -r win-x64 --self-contained true --no-restore -t:Rebuild -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -p:DebugSymbols=false -p:UseSharedCompilation=false -m:1 --nologo
+$taskPublishOptions = @('-p:PublishSingleFile=true', '-p:IncludeSourceRevisionInInformationalVersion=false', '-p:DebugType=none', '-p:DebugSymbols=false', '-p:UseSharedCompilation=false', '-m:1', '--nologo')
+& dotnet build $taskProject -c Release -r win-x64 --self-contained true --no-restore -t:Rebuild @taskPublishOptions
 if ($LASTEXITCODE -ne 0) { throw 'Release compilation failed.' }
-& dotnet publish $taskProject -c Release -r win-x64 --self-contained true --no-restore --no-build -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -p:DebugSymbols=false -p:UseSharedCompilation=false -m:1 -o $taskPublish --nologo
+& dotnet publish $taskProject -c Release -r win-x64 --self-contained true --no-restore --no-build -o $taskPublish @taskPublishOptions
 if ($LASTEXITCODE -ne 0) { throw 'Application publish failed.' }
 Copy-Item -LiteralPath (Join-Path $taskPublish 'KeyTrail.exe') -Destination (Join-Path $taskPayload '键盘统计器.exe')
+# WPF loads these libraries when opening the first window, potentially long
+# after Windows has cleared the application's temporary extraction directory.
+$taskNativeLibraries = @(Get-ChildItem -LiteralPath $taskPublish -File -Filter '*.dll')
+if ('wpfgfx_cor3.dll' -notin $taskNativeLibraries.Name -or 'PresentationNative_cor3.dll' -notin $taskNativeLibraries.Name) { throw 'The WPF runtime must be present beside the application.' }
+Copy-Item -LiteralPath $taskNativeLibraries.FullName -Destination $taskPayload
 $taskReadme = [IO.File]::ReadAllText((Join-Path $taskRoot 'installer\使用说明.txt')).Replace('{{VERSION}}', $taskVersion)
 [IO.File]::WriteAllText((Join-Path $taskPayload '使用说明.txt'), $taskReadme, [Text.UTF8Encoding]::new($true))
 
@@ -61,7 +69,7 @@ if ($taskFileInfo.ProductVersion -ne $taskVersion -or $taskFileInfo.ProductName 
 $taskManifest = @(Get-ChildItem -LiteralPath $taskPayload -File -Recurse | ForEach-Object {
     [pscustomobject]@{Path=[IO.Path]::GetRelativePath($taskPayload, $_.FullName);Bytes=$_.Length;Sha256=(Get-FileHash -LiteralPath $_.FullName).Hash}
 })
-if ($taskManifest.Count -ne 5) { throw 'Unexpected files in the clean payload.' }
+if ($taskManifest.Count -ne (5 + $taskNativeLibraries.Count)) { throw 'Unexpected files in the clean payload.' }
 $taskManifest | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $taskReport 'payload-manifest.json') -Encoding UTF8
 
 & $CompilerPath '--quiet-progress' ('--define=PayloadDir=' + $taskPayload) ('--define=ReleaseDir=' + $taskRelease) ('--define=AppVersion=' + $taskVersion) (Join-Path $taskRoot 'installer\KeyboardStats.iss')

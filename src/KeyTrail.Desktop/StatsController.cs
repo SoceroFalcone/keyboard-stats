@@ -12,6 +12,7 @@ public sealed class StatsController : IDisposable
     public KeyAccumulator Accumulator { get; } = new();
     public StatsStore Store { get; }
     public AppSettings Settings { get; }
+    public string? SettingsRecoveryNotice { get; }
     public string DataRoot { get; }
     public string? Error { get; private set; }
     public bool IsDemo { get; }
@@ -23,7 +24,8 @@ public sealed class StatsController : IDisposable
         DataRoot = dataRoot;
         Directory.CreateDirectory(dataRoot);
         Store = new StatsStore(Path.Combine(dataRoot, "days"));
-        Settings = AppSettings.Load(dataRoot);
+        Settings = AppSettings.Load(dataRoot, out var settingsRecoveryNotice);
+        SettingsRecoveryNotice = settingsRecoveryNotice;
         Accumulator.CountRepeats = Settings.CountRepeats;
         Accumulator.Paused = Settings.Paused;
         // Fail visibly before collecting if today's persistent statistics cannot be loaded.

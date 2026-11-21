@@ -120,7 +120,8 @@ public partial class MainWindow : Window
         StatusText.Text = _controller.IsDemo ? "演示模式" : error is not null ? "需要处理" : _controller.Accumulator.Paused ? "已暂停" : "正在统计";
         StatusDot.Fill = Brush(error is not null ? "#F4AA87" : _controller.Accumulator.Paused ? "#F0D692" : "#3B608F");
         PauseButton.Content = _controller.Accumulator.Paused ? "继续统计" : "暂停统计";
-        NoticeText.Text = error ?? (DateTime.Now < _noticeUntil ? _uiNotice : null) ?? (_controller.IsDemo ? "演示数据 · 仅用于界面预览，未监听键盘或鼠标，数据与真实统计完全隔离。" : _controller.Store.RecoveryNotice ?? "");
+        var recoveryNotice = _controller.Store.RecoveryNotice ?? _controller.SettingsRecoveryNotice;
+        NoticeText.Text = error ?? (DateTime.Now < _noticeUntil ? _uiNotice : null) ?? (_controller.IsDemo ? "演示数据 · 仅用于界面预览，未监听键盘或鼠标，数据与真实统计完全隔离。" : recoveryNotice ?? "");
         NoticeBanner.Visibility = NoticeText.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
         FooterLabel.Text = _controller.Accumulator.Paused && !_controller.IsDemo ? "统计已暂停 · 点击「继续统计」恢复" : "统计会自动跟随本机日期归档";
         UpdateDateToolbar(today);

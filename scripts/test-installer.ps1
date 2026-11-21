@@ -53,7 +53,7 @@ Assert-InstalledPayload
 Write-Output 'PASS fresh per-user installation in a path containing Chinese characters and spaces.'
 
 $taskPackageReport = Join-Path $taskTest 'app-smoke'
-& (Join-Path $PSScriptRoot 'test-package.ps1') -Executable ([IO.Path]::GetRelativePath($taskRoot, $taskExe)) -ExpectedVersion $taskBuild.Version -ReportDirectory ([IO.Path]::GetRelativePath($taskRoot, $taskPackageReport))
+& (Join-Path $PSScriptRoot 'test-package.ps1') -Executable ([IO.Path]::GetRelativePath($taskRoot, $taskExe)) -ExpectedVersion $taskBuild.Version -ReportDirectory ([IO.Path]::GetRelativePath($taskRoot, $taskPackageReport)) -RequireInstalledRuntime
 $taskSmoke = Get-Content -LiteralPath (Join-Path $taskPackageReport 'final-package-test.json') -Raw | ConvertFrom-Json
 $taskDataHashes = @{}
 foreach ($taskData in (Get-ChildItem -LiteralPath $taskSmoke.Fixture -File -Recurse)) { $taskDataHashes[$taskData.FullName] = (Get-FileHash -LiteralPath $taskData.FullName).Hash }
@@ -89,7 +89,10 @@ $taskRegistered = Get-ItemProperty -LiteralPath $taskUninstallKey
 if ($taskRegistered.InstallLocation.TrimEnd('\') -ne $taskInstall -or -not $taskUninstaller.StartsWith($taskReport + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw 'Uninstall target is not the isolated test installation.' }
 $taskUninstallExit = Invoke-InstallerProcess $taskUninstaller @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', ('/LOG="' + (Join-Path $taskTest 'uninstall.log') + '"'))
 if ($taskUninstallExit -ne 0) { throw ('Uninstall failed: ' + $taskUninstallExit) }
-if ((Test-Path -LiteralPath $taskExe) -or (Test-Path -LiteralPath $taskUninstallKey)) { throw 'Uninstall did not remove the app or Windows registration.' }
+foreach ($taskFile in $taskManifest) {
+    if (Test-Path -LiteralPath (Join-Path $taskInstall $taskFile.Path)) { throw ('Uninstall left an installed file: ' + $taskFile.Path) }
+}
+if (Test-Path -LiteralPath $taskUninstallKey) { throw 'Uninstall did not remove the Windows registration.' }
 Assert-TestDataPreserved
 foreach ($taskShortcut in $taskShortcutPaths) {
     $taskShortcutAfter = if (Test-Path -LiteralPath $taskShortcut) { (Get-FileHash -LiteralPath $taskShortcut).Hash } else { '' }
@@ -113,6 +116,7 @@ if ($taskSharedInstaller.Count -ne 1 -or (Get-FileHash -LiteralPath $taskSharedI
 $taskResult = [pscustomobject]@{
     Version=$taskBuild.Version; InstallerSha256=$taskBuild.InstallerSha256
     FreshInstall=$true; PayloadFilesVerified=$taskManifest.Count; PackagedAppStarted=$taskSmoke.DashboardStarted
+    OpenedFromBackgroundWithoutExtraction=$taskSmoke.OpenedFromBackgroundWithoutExtraction
     SingleInstanceVerified=($taskSmoke.SecondLaunchExitCode -eq 0); CooperativeExitVerified=($taskSmoke.CooperativeExitCode -eq 0)
     RunningInstallBlocked=$true; RunningUninstallBlocked=$true; RunningInstallExitCode=$taskBlockedInstallExit; RunningUninstallExitCode=$taskBlockedUninstallExit
     Reinstall=$true; Uninstall=$true; HistoryFilesPreserved=$taskSmoke.DemoDays

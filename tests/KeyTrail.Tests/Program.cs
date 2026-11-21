@@ -106,6 +106,23 @@ Test("Damaged primary recovers validated backup and preserves corrupt original",
     Check(Directory.GetFiles(path, "*.corrupt-*").Length == 1, "Corrupt original not retained");
     Check(new StatsStore(path).GetDay(date).Total == 5, "Recovered primary not valid");
 });
+Test("History recovers a missing day file even after a single save", () =>
+{
+    var path = Fresh("missing-day");
+    var store = new StatsStore(path);
+    store.Merge(new[] { Batch(5) });
+    store.Flush();
+    var primary = Path.Combine(path, "2026-11-14.json");
+    File.Move(primary, primary + ".removed");
+    File.WriteAllText(Path.Combine(path, "2026-11-13.json.tmp"), "abandoned write");
+    File.WriteAllText(Path.Combine(path, "2026-11-12.json.corrupt-example"), "damaged copy");
+
+    var restarted = new StatsStore(path);
+    Check(restarted.GetDates().SequenceEqual(new[] { date }), "History must include the backup-only day and skip scratch files");
+    Check(restarted.GetSummaries().Single().Total == 5, "History did not recover the first saved snapshot");
+    Check(File.Exists(primary) && restarted.RecoveryNotice is not null, "Recovery did not restore and report the missing file");
+});
+
 Test("Invalid primary without backup is never overwritten", () =>
 {
     var path = Fresh("unrecoverable"); Directory.CreateDirectory(path);

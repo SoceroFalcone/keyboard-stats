@@ -44,7 +44,7 @@
       <StackPanel><StackPanel Orientation="Horizontal"><Ellipse x:Name="StatusDot" Width="7" Height="7" Fill="#3B608F" Margin="0,0,7,0"/><TextBlock x:Name="StatusText" Text="正在统计" Foreground="#1F3A5C" FontSize="13"/></StackPanel><TextBlock Text="数据仅保存在此电脑" Foreground="#5A6072" FontSize="12" Margin="0,7,0,0"/></StackPanel>
      </Border>
      <Button x:Name="PauseButton" Content="暂停统计" Click="Pause_Click" Background="#3B608F" Foreground="White" BorderThickness="0"/>
-     <TextBlock Text="版本 1.7.0 · 本地统计" Foreground="#5A6072" FontSize="12" Margin="8,17,0,0"/>
+     <TextBlock Text="版本 1.7.2 · 本地统计" Foreground="#5A6072" FontSize="12" Margin="8,17,0,0"/>
     </StackPanel>
    </Grid>
   </Border>
@@ -226,7 +226,7 @@
        <CheckBox x:Name="StartupCheck" Content="登录 Windows 后自动开始运行" Click="Startup_Changed"/><TextBlock Text="启用后从托盘启动。若上次为暂停状态，重启后仍保持暂停。" Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="23,0,0,3"/>
       </StackPanel></Border>
       <Border Style="{StaticResource Panel}" Margin="0,0,0,18"><StackPanel><TextBlock Text="你的数据，留在你的电脑" Style="{StaticResource SectionTitle}"/><TextBlock Text="仅保存键盘按键和鼠标按钮的次数、每小时总量和活跃分钟。不记录输入文字、按键顺序、鼠标位置、窗口或应用信息，也不会联网发送数据。" TextWrapping="Wrap" Foreground="#5A6072" LineHeight="24" Margin="0,14,0,17"/><TextBlock Text="数据目录" Style="{StaticResource Caption}"/><TextBox x:Name="DataPathBox" IsReadOnly="True" BorderThickness="0" Background="#EEF0F3" Padding="10" Margin="0,7,0,12" TextWrapping="Wrap" AutomationProperties.Name="本地统计数据目录"/><StackPanel Orientation="Horizontal"><Button Content="打开数据目录" Click="OpenFolder_Click"/><Button Content="导出全部记录" Click="ExportAll_Click" Margin="10,0,0,0"/></StackPanel></StackPanel></Border>
-      <Border Style="{StaticResource Panel}"><StackPanel><TextBlock Text="关于统计" Style="{StaticResource SectionTitle}"/><TextBlock Text="按本机日期在午夜自动分日，每 5 秒保存一次，正常退出时立即保存。活跃分钟表示该分钟内至少发生过一次键盘敲击或鼠标点击，同一分钟只算一次，并非连续工作时长。" TextWrapping="Wrap" Foreground="#5A6072" LineHeight="24" Margin="0,14,0,12"/><TextBlock Text="键盘热力图采用照片中的无数字区布局。数字小键盘及其他额外按键仍会统计，可在「全部按键」中查看。Fn 等不向 Windows 发送独立键码的硬件键无法计数；锁屏和安全桌面不统计。鼠标统计左键、右键、中键（滚轮按下）和两个侧键；移动、拖拽过程与滚轮滚动不额外计数。软件模拟的输入默认忽略。" TextWrapping="Wrap" Foreground="#5A6072" LineHeight="24"/><TextBlock Text="键盘统计器 1.7.0 · Windows 桌面版" Style="{StaticResource Caption}" Margin="0,20,0,0"/></StackPanel></Border>
+      <Border Style="{StaticResource Panel}"><StackPanel><TextBlock Text="关于统计" Style="{StaticResource SectionTitle}"/><TextBlock Text="按本机日期在午夜自动分日，每 5 秒保存一次，正常退出时立即保存。活跃分钟表示该分钟内至少发生过一次键盘敲击或鼠标点击，同一分钟只算一次，并非连续工作时长。" TextWrapping="Wrap" Foreground="#5A6072" LineHeight="24" Margin="0,14,0,12"/><TextBlock Text="键盘热力图采用照片中的无数字区布局。数字小键盘及其他额外按键仍会统计，可在「全部按键」中查看。Fn 等不向 Windows 发送独立键码的硬件键无法计数；锁屏和安全桌面不统计。鼠标统计左键、右键、中键（滚轮按下）和两个侧键；移动、拖拽过程与滚轮滚动不额外计数。软件模拟的输入默认忽略。" TextWrapping="Wrap" Foreground="#5A6072" LineHeight="24"/><TextBlock Text="键盘统计器 1.7.2 · Windows 桌面版" Style="{StaticResource Caption}" Margin="0,20,0,0"/></StackPanel></Border>
      </StackPanel>
     </Grid>
    </ScrollViewer>
